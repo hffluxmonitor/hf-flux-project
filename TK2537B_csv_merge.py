@@ -47,7 +47,7 @@ def merge_csv_files():
     dir_path = 'C://Users/'+username+'/Dropbox/Obrist Lab/Tekran/Raw Data/2537B_Gradient/csvTK/'
     results = 'C://Users/'+username+'/Documents/Hg/HgData.csv'
     
-    #os.remove('C://Users/'+username+'/Documents/Hg/HgData.csv')
+    os.remove('C://Users/'+username+'/Documents/Hg/HgData.csv')
     os.chdir(dir_path)
     files = os.listdir(dir_path)
     for f in files:
@@ -89,7 +89,8 @@ def merge_csv_files():
 ###############################################################################
 ##Email Latest status/file
 #%%
-if __name__ == "__main__":
+def mail_update():
+    username = os.getlogin()
     lastDate = merge_csv_files()
     latestFile = "C://Users/"+username+"/Dropbox/Obrist Lab/Tekran/Raw Data/2537B_Gradient/csvTK/"+"TK"+lastDate[0].replace("-","")+".csv"
     
@@ -109,7 +110,7 @@ if __name__ == "__main__":
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
     
-    username = 'hffluxmonitor@gmail.com'  # Email Address from the email you want to send an email
+    username1 = 'hffluxmonitor@gmail.com'  # Email Address from the email you want to send an email
     password = 'vssapffsdgrauqlp'  # App Password
     server = smtplib.SMTP('')
     
@@ -118,12 +119,12 @@ if __name__ == "__main__":
 
 
     # Function that sends email.
-    def send_mail(username, password, from_addr, to_addrs, msg):
+    def send_mail(username1, password, from_addr, to_addrs, msg):
         server = smtplib.SMTP('smtp.gmail.com','587')
         server.ehlo()
         server.starttls()
         server.ehlo()
-        server.login(username, password)
+        server.login(username1, password)
         server.sendmail(from_addr, to_addrs, msg.as_string())
         server.quit()
     
@@ -134,7 +135,7 @@ if __name__ == "__main__":
         msg = MIMEMultipart()
     
         from_addr = "hffluxmonitor@gmail.com"
-        msg['Subject'] = "Tekcap Status: "+status+"     Last Date Read: "+lastDate[0]+" "+lastDate[1]
+        msg['Subject'] = "Tekcap 2537B Status: "+status+"     Last Date Read: "+lastDate[0]+" "+lastDate[1]
         msg['From'] = from_addr
         msg['To'] = to_addrs
     
@@ -143,8 +144,9 @@ if __name__ == "__main__":
         msg.attach(body)
     
         try:
-            send_mail(username, password, from_addr, to_addrs, msg)
+            send_mail(username1, password, from_addr, to_addrs, msg)
             print("Email successfully sent to "+ to_addrs)
         except:
             print("Failed")
+    return
 #%%

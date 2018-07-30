@@ -16,13 +16,17 @@ import create_even_time_series
 import merge_hg_sonic_data
 
 #%%
-#Merge all Tekran 2537B files into one csv
+#Merge all Tekran 2537B files into one csv and sends an email containing last
+#file read in and instrument status
 TK2537B_csv_merge.merge_csv_files()
+TK2537B_csv_merge.mail_update()
 #%%
-#Merge all Tekran 2537X files into one csv
+#Merge all Tekran 2537X files into one csv and sends an email containing last
+#file read in and instrument status
 TK2537X_csv_merge.merge_csv_files()
+TK2537X_csv_merge.mail_update()
 #%%
-#Retrieve sonic files and merge
+#Retrieve sonic files and merges into one .csv file
 getSonicData.sonic_ftp()
 #%%
 #Create evenly spaced time series csv files (5 min for B, 2.5 for X)

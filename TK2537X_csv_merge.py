@@ -10,7 +10,6 @@ removed
 import csv
 import os
 import pandas as pd
-import numpy as np
 from datetime import date
 
 ###Should update this script to append new files onto final file instead of 
@@ -74,6 +73,63 @@ def merge_csv_files():
     HgData = HgData.drop(['QC'],axis=1)
     
     HgData.to_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/TK2537XData.csv')
-    return
+    return row
 
+def mail_update():
+    username = os.getlogin()
+    lastDate = merge_csv_files()
+    latestHgData = pd.read_csv("C://Users/"+username+"/Dropbox/Obrist Lab/Tekran/Raw_Data/2537X_Gradient/csvX/"+"GR"+lastDate[0].replace("-","")+".csv",header=0,
+                               names = ['Date','Time','Typ','C','Stat','Stat.1','AdTim','Vol',
+                                  'Bl','Bldev','MaxV','Area','ng/m3'])
+    latestHgData = latestHgData.to_html()
+     
+    today = date.today()
+    today = today.strftime("%y-%m-%d")
+    if lastDate[0] == today:
+        status = "RUNNING"
+    else:
+        status = "DOWN"
+     
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+    
+    username1 = 'hffluxmonitor@gmail.com'  # Email Address from the email you want to send an email
+    password = 'vssapffsdgrauqlp'  # App Password
+    
+    # Create the body of the message (a HTML version for formatting).
+    html = latestHgData
+
+
+    # Function that sends email.
+    def send_mail(username1, password, from_addr, to_addrs, msg):
+        server = smtplib.SMTP('smtp.gmail.com','587')
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(username1, password)
+        server.sendmail(from_addr, to_addrs, msg.as_string())
+        server.quit()
+    
+    email_list = ['trichards1935@gmail.com','timothy_richards@student.uml.edu',
+                  'Dean_Howard@uml.edu']
+    
+    for to_addrs in email_list:
+        msg = MIMEMultipart()
+    
+        from_addr = "hffluxmonitor@gmail.com"
+        msg['Subject'] = "Tekcap 2537X Status: "+status+"     Last Date Read: "+lastDate[0]+" "+lastDate[1]
+        msg['From'] = from_addr
+        msg['To'] = to_addrs
+    
+        # Attach HTML to the email
+        body = MIMEText(html, 'html')
+        msg.attach(body)
+    
+        try:
+            send_mail(username1, password, from_addr, to_addrs, msg)
+            print("Email successfully sent to "+ to_addrs)
+        except:
+            print("Failed")
+    return
 

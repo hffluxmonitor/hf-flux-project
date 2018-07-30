@@ -21,7 +21,6 @@ def sonic_ftp():
     ftp.retrlines("LIST", listing.append)
     words = listing[0].split(None, 8)
     filename = words[-1].lstrip()
-    filename2 = os.path.basename
     filenames = ftp.nlst()
     username = os.getlogin()
     # 
