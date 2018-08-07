@@ -3,25 +3,29 @@
 Created on Mon Jun  4 11:56:36 2018
 
 @author: Timothy_Richards
+
+Description:
 """
 #Program to monitor QA of flux system. Email status every Monday morning.
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+from datetime import datetime,timedelta
 
-username = os.getlogin()
+username1 = os.getlogin()
 
-data = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/Tekran/Raw Data/2537B_Gradient/HgQADataSet.csv')
+data = pd.read_csv('C://Users/'+username1+'/Dropbox/Obrist Lab/Tekran/Raw Data/2537B_Gradient/HgQADataSet.csv')
 
-data.set_index('datetime',inplace=True)
+data['datetime'] = pd.to_datetime(data['datetime'],yearfirst=True)
+data = data.set_index('datetime')
 data.index = pd.to_datetime(data.index)
-data.date = pd.to_datetime(data.date)
 
 #Slice dataframe to use only last 30 days
 today = pd.datetime.today().date()
-cut_off = today - pd.offsets.Day(29)
+cut_off = pd.to_datetime(today - pd.offsets.Day(29))
 data = data[cut_off:]
+
 
 #plot conc(where type == 'CONT' and stat == 'OK' and cart == 'A') against timestamp
 fig1, ax1 = plt.subplots()
@@ -111,13 +115,71 @@ figCal.autofmt_xdate()
 figCal.tight_layout()
 locs, labels = plt.xticks()
 plt.xticks(np.arange(locs[0], locs[-1], step=3))
+#%%
+##Calculate RPD for each intake and plot
+#now = datetime.now()
+#now_minus_90 = now - datetime.timedelta(minutes = 90)
+#data = data.reset_index()
+#
+#data0 = data[(data.type == 'CONT') & (data.stat == 'OK') & (data.flag == 0) & (data.datetime > now_minus_90)]
+#data1 = data[(data.type == 'CONT') & (data.stat == 'OK') & (data.flag == 1) & (data.datetime > now_minus_90)]
+#
+#a_data = data0[data0.cart == 'A']
+#b_data = data0[data0.cart == 'B']
+#
+#a_data = np.mean(a_data.conc)
+#b_data = np.mean(b_data.conc)
+#
+#rpd = np.abs(a_data - b_data)/np.mean([a_data,b_data])*100
+#%%
+timespan = 90 #minutes
+timespan = timespan/1440 #days
+timespan = datetime.now() - timedelta(minutes = 90)
+now = datetime.now()
+data = data.reset_index()
+
+Inlet_flags = [0,1] #B Unit
+
+#Run through each inlet
+for v in range(len(Inlet_flags)):
+    #set inlet flag
+    inlet = Inlet_flags[v]
+            
+    #Create temp array to hold RPD data
+    rpd_temp = pd.DataFrame(index = range(0,len(data)),columns = ['A'])
+    
+    #Run through each measurement in dataframe
+    for i in range(len(data)):
+        #Only calculate for valid measurements
+        if data.type[i] == 'CONT':
+            #find all valid A data
+            a_data = data.conc[(data.cart == 'A') & (data.type == 'CONT') & (data.stat == 'OK') & (data.flag == inlet) & (data.datetime > timespan)]
+            #find all valid B data
+            b_data = data.conc[(data.cart == 'B') & (data.type == 'CONT') & (data.stat == 'OK') & (data.flag == inlet) & (data.datetime > timespan)]
+            
+            #calculate means of A and B over the time period
+            a_data = np.nanmean(a_data)
+            b_data = np.nanmean(b_data)
+            
+            #Calculate RPD from mean values
+            rpd_temp.A[i] = np.abs(a_data-b_data)/np.mean([a_data,b_data])
+            
+#Maybe assign rpd_temp back to data using timestamp as index? Then plot would 
+#change over time
+        
+    
+    
+
+
+    
 
 
 
 
-fig1.savefig("C://Users/Timothy_Richards/Documents/figConcAB.png")
-figCal.savefig("C://Users/Timothy_Richards/Documents/figCal.png")
-fig.savefig("C://Users/Timothy_Richards/Documents/fig2537BQA.png")
+#%%
+fig1.savefig("C://Users/"+username1+"/Documents/figConcAB.png")
+figCal.savefig("C://Users/"+username1+"/Documents/figCal.png")
+fig.savefig("C://Users/"+username1+"/Documents/fig2537BQA.png")
 #%%
 #Email Plots
 import smtplib
@@ -163,15 +225,15 @@ for strTo in email_list:
     msgAlternative.attach(msgText)
     
     #Open Images
-    fp = open('C://Users/Timothy_Richards/Documents/figConcAB.png','rb')
+    fp = open('C://Users/'+username1+'/Documents/figConcAB.png','rb')
     msgImage = MIMEImage(fp.read())
     fp.close()
     
-    fp = open('C://Users/Timothy_Richards/Documents/fig2537BQA.png','rb')
+    fp = open('C://Users/'+username1+'/Documents/fig2537BQA.png','rb')
     msgImage2 = MIMEImage(fp.read())
     fp.close()
     
-    fp = open('C://Users/Timothy_Richards/Documents/figCal.png','rb')
+    fp = open('C://Users/'+username1+'/Documents/figCal.png','rb')
     msgImage3 = MIMEImage(fp.read())
     fp.close()
     
