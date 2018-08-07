@@ -3,6 +3,8 @@
 Created on Thu Jun 28 08:33:38 2018
 
 @author: Timothy_Richards
+
+Description: 
 """
 import pandas as pd
 import os
@@ -27,7 +29,7 @@ def calc_micromet_vars(df):
     #convert T to Kelvin
     df['T_K'] = df['T']+273
     
-    df['H'] = df['Fheat']*100 #obviously not correct, but sensible heat flux seems to be off by factor of 100
+    df['H'] = df['Fheat']*100 #Fheat was off by a factor of 100; Bill will let us know the date that he's corrected this issue
     
     #Calculate L
     df['L'] = ((-(df['u*']**3)*df['T_K']*rho*c_p)/(k*g*(df['H'])))
