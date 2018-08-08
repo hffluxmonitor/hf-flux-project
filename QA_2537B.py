@@ -25,7 +25,53 @@ data.index = pd.to_datetime(data.index)
 today = pd.datetime.today().date()
 cut_off = pd.to_datetime(today - pd.offsets.Day(29))
 data = data[cut_off:]
+#%%
+#Was going to make this a function, but can't figure out how to return dataframe correctly
+#Calculate RPD for both inlets, Tekran B
+timespan = timedelta(minutes = 90)
+data['timedelta'] = pd.to_timedelta(data.index.values)
+data = data.reset_index()
 
+Inlet_flags = [0,1] #B Unit
+
+#Run through each inlet
+for v in range(len(Inlet_flags)):
+    #set inlet flag
+    inlet = Inlet_flags[v]
+            
+    #Create temp array to hold RPD data
+    rpd_temp = pd.DataFrame(index = range(0,len(data)),columns = ['A'])
+    
+    #Run through each measurement in dataframe
+    for i in range(len(data)):
+        #Only calculate for valid measurements
+        if data.type[i] == 'CONT' and data.stat[i] == 'OK' and data.flag[i] == inlet:
+            #find all valid A data
+            a_data = data.conc[(data.timedelta > data.timedelta[i]-timespan) &
+                               (data.timedelta <= data.timedelta[i]) &
+                               (data.cart == 'A') & (data.type == 'CONT') &
+                               (data.stat == 'OK') & (data.flag == inlet)]
+            #find all valid B data
+            b_data = data.conc[(data.timedelta > data.timedelta[i]-timespan) &
+                               (data.timedelta <= data.timedelta[i]) &
+                               (data.cart == 'B') & (data.type == 'CONT') &
+                               (data.stat == 'OK') & (data.flag == inlet)]
+            
+            #calculate means of A and B over the time period
+            a_data = np.nanmean(a_data)
+            b_data = np.nanmean(b_data)
+            
+            #Calculate RPD from mean values
+            rpd_temp.A[i] = (np.abs(a_data-b_data)/np.mean([a_data,b_data]))*100 #percent
+    data['RPD_'+ str(v)] = rpd_temp.A
+    data['RPD_'+ str(v)] = data['RPD_'+ str(v)].astype(float)
+    
+#Reset index to datetime format for plotting timeseries
+data['datetime'] = pd.to_datetime(data['datetime'],yearfirst=True)
+data = data.set_index('datetime')
+data.index = pd.to_datetime(data.index)
+#%%
+##Plots
 
 #plot conc(where type == 'CONT' and stat == 'OK' and cart == 'A') against timestamp
 fig1, ax1 = plt.subplots()
@@ -47,7 +93,7 @@ fig1.autofmt_xdate()
 locs, labels = plt.xticks()
 plt.xticks(np.arange(locs[0], locs[-1], step=3))
 plt.ylabel(r'GEM [ng $\mathrm{m^{-3}]}$')
-plt.title('GEM conc. vs. time')
+plt.title('GEM concentration',weight='bold')
 fig1.tight_layout()
 
 #Bl: plot bl against timestamp
@@ -58,7 +104,7 @@ fig.autofmt_xdate()
 fig.tight_layout()
 ax[0].plot(bl.index.values,bl.bl,color = "red",label = 'bl')
 ax[0].legend()
-ax[0].set_title('Tekran variables vs. time')
+ax[0].set_title('Tekran variables',weight='bold')
 data = data.drop('flag2',axis=1)
 
 #BlDev: plot bldev against timestamp
@@ -87,7 +133,7 @@ figCal, axCal = plt.subplots(2,1,sharex=True)
 data['flag2'] = np.where(np.logical_and(data.type == 'SPAN',data.cart == 'A'),1,0)
 spanA = data[data.flag2 == 1]
 axCal[0].plot(spanA.index.values,spanA.area,color = 'red',label = 'SPAN: A')
-axCal[0].set_title('Area vs. time')
+axCal[0].set_title('Area',weight='bold')
 data = data.drop('flag2',axis=1)
 
 
@@ -115,71 +161,30 @@ figCal.autofmt_xdate()
 figCal.tight_layout()
 locs, labels = plt.xticks()
 plt.xticks(np.arange(locs[0], locs[-1], step=3))
-#%%
-##Calculate RPD for each intake and plot
-#now = datetime.now()
-#now_minus_90 = now - datetime.timedelta(minutes = 90)
-#data = data.reset_index()
-#
-#data0 = data[(data.type == 'CONT') & (data.stat == 'OK') & (data.flag == 0) & (data.datetime > now_minus_90)]
-#data1 = data[(data.type == 'CONT') & (data.stat == 'OK') & (data.flag == 1) & (data.datetime > now_minus_90)]
-#
-#a_data = data0[data0.cart == 'A']
-#b_data = data0[data0.cart == 'B']
-#
-#a_data = np.mean(a_data.conc)
-#b_data = np.mean(b_data.conc)
-#
-#rpd = np.abs(a_data - b_data)/np.mean([a_data,b_data])*100
-#%%
-timespan = 90 #minutes
-timespan = timespan/1440 #days
-timespan = datetime.now() - timedelta(minutes = 90)
-now = datetime.now()
-data = data.reset_index()
 
-Inlet_flags = [0,1] #B Unit
-
-#Run through each inlet
-for v in range(len(Inlet_flags)):
-    #set inlet flag
-    inlet = Inlet_flags[v]
-            
-    #Create temp array to hold RPD data
-    rpd_temp = pd.DataFrame(index = range(0,len(data)),columns = ['A'])
-    
-    #Run through each measurement in dataframe
-    for i in range(len(data)):
-        #Only calculate for valid measurements
-        if data.type[i] == 'CONT':
-            #find all valid A data
-            a_data = data.conc[(data.cart == 'A') & (data.type == 'CONT') & (data.stat == 'OK') & (data.flag == inlet) & (data.datetime > timespan)]
-            #find all valid B data
-            b_data = data.conc[(data.cart == 'B') & (data.type == 'CONT') & (data.stat == 'OK') & (data.flag == inlet) & (data.datetime > timespan)]
-            
-            #calculate means of A and B over the time period
-            a_data = np.nanmean(a_data)
-            b_data = np.nanmean(b_data)
-            
-            #Calculate RPD from mean values
-            rpd_temp.A[i] = np.abs(a_data-b_data)/np.mean([a_data,b_data])
-            
-#Maybe assign rpd_temp back to data using timestamp as index? Then plot would 
-#change over time
-        
-    
-    
-
-
-    
-
-
-
+#Plot RPD for both intakes
+figRPD, axes = plt.subplots(2,1,sharex=True)
+axes[0].plot(data['RPD_0'], color = 'darkgreen',label = 'RPD 0')
+axes[1].plot(data['RPD_1'], color = 'darkblue', label = 'RPD 1')
+axes[0].set_ylim(0,20)
+axes[1].set_ylim(0,20)
+axes[0].axhline(10,linestyle='dotted')
+axes[1].axhline(10,linestyle='dotted')
+axes[0].legend()
+axes[1].legend()
+axes[0].set_ylabel('RPD (%)')
+axes[1].set_ylabel('RPD (%)')
+axes[0].set_title('Relative percent difference',weight='bold')
+figRPD.autofmt_xdate()
+locs, labels = plt.xticks()
+plt.xticks(np.arange(locs[0], locs[-1], step=3))
+figRPD.tight_layout()
 
 #%%
 fig1.savefig("C://Users/"+username1+"/Documents/figConcAB.png")
 figCal.savefig("C://Users/"+username1+"/Documents/figCal.png")
 fig.savefig("C://Users/"+username1+"/Documents/fig2537BQA.png")
+figRPD.savefig("C://Users/"+username1+"/Documents/figRPD.png")
 #%%
 #Email Plots
 import smtplib
@@ -221,7 +226,8 @@ for strTo in email_list:
     msgAlternative.attach(msgText)
     
     #Reference the image in the IMG SRC attribute by ID
-    msgText = MIMEText('<b>Tekran 2537B QA over last 30 days</b><br><img src="cid:image1"><img src="cid:image2"><br><br><img src="cid:image3"><br>','html')
+    msgText = MIMEText('<b>Tekran 2537B QA over last 30 days</b><br><img src="cid:image1">'
+                       '<img src="cid:image2"><br><br><img src="cid:image3"><img src="cid:image4"><br>','html')
     msgAlternative.attach(msgText)
     
     #Open Images
@@ -237,13 +243,19 @@ for strTo in email_list:
     msgImage3 = MIMEImage(fp.read())
     fp.close()
     
+    fp = open('C://Users/'+username1+'/Documents/figRPD.png','rb')
+    msgImage4 = MIMEImage(fp.read())
+    fp.close()
+    
     #Define Image ID
     msgImage.add_header('Content-ID', '<image1>')
     msgImage2.add_header('Content-ID', '<image2>')
     msgImage3.add_header('Content-ID', '<image3>')
+    msgImage4.add_header('Content-ID', '<image4>')
     msg.attach(msgImage)
     msg.attach(msgImage2)
     msg.attach(msgImage3)
+    msg.attach(msgImage4)
     
     #Send the email
     try:

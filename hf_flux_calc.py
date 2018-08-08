@@ -29,7 +29,9 @@ def calc_micromet_vars(df):
     #convert T to Kelvin
     df['T_K'] = df['T']+273
     
-    df['H'] = df['Fheat']*100 #Fheat was off by a factor of 100; Bill will let us know the date that he's corrected this issue
+    #Multiply Fheat by 100 to calculate sensible heat flux for all dates prior to August 4th
+    #Fheat was corrected on August 4th, 2018 
+    df['H'] = np.where(df['day.EST'] < 216.0179,df['Fheat']*100,df['Fheat']) 
     
     #Calculate L
     df['L'] = ((-(df['u*']**3)*df['T_K']*rho*c_p)/(k*g*(df['H'])))
