@@ -78,6 +78,7 @@ def flux_calc(df):
     df_flux = FluxSpikeRemoval.qc_spike_removal(df_flux,23) #flux
     df_flux = FluxSpikeRemoval.qc_spike_removal(df_flux,16) #H
     df_flux = FluxSpikeRemoval.qc_spike_removal(df_flux,22) #GEM avg conc
+    df_flux = FluxSpikeRemoval.qc_spike_removal(df_flux,2)  #Gradient
     
     return df_flux
 
