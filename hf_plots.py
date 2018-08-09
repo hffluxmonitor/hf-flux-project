@@ -42,17 +42,22 @@ df4 = df[df['month']==4]
 df5 = df[df['month']==5]
 df6 = df[df['month']==6]
 df7 = df[df['month']==7]
+df8 = df[df['month']==8]
 fig, ax = plt.subplots()
 ax.plot(df4['flux_ma'],color = 'green')
 ax.plot(df5['flux_ma'],color = 'yellow')
 ax.plot(df6['flux_ma'],color = 'maroon')
 ax.plot(df7['flux_ma'],color = 'red')
+ax.plot(df8['flux_ma'],color = 'darkblue')
+ax.axhline(0,linestyle='dotted')
 fig.autofmt_xdate()
+fig.tight_layout()
 
 df4h = df4.pivot_table(columns = 'hour', values = 'flux_ma',aggfunc=np.mean).T
 df5h = df5.pivot_table(columns = 'hour', values = 'flux_ma',aggfunc=np.mean).T
 df6h = df6.pivot_table(columns = 'hour', values = 'flux_ma',aggfunc=np.mean).T
 df7h = df7.pivot_table(columns = 'hour', values = 'flux_ma',aggfunc=np.mean).T
+df8h = df8.pivot_table(columns = 'hour', values = 'flux_ma',aggfunc=np.mean).T
 
 set_style()
 fig2, ax2 = plt.subplots()
@@ -60,7 +65,9 @@ ax2.plot(df4h.flux_ma, color = 'green',label = 'April')
 ax2.plot(df5h.flux_ma, color = 'gold',label = 'May')
 ax2.plot(df6h.flux_ma, color = 'maroon',label = 'June')
 ax2.plot(df7h.flux_ma, color = 'red',label = 'July')
+ax2.plot(df8h.flux_ma, color = 'darkblue',label = 'August')
 ax2.legend()
+ax2.axhline(0,linestyle='dotted')
 ax2.set_xlabel('Hour')
 ax2.set_xticks(df4h.index.values)
 ax2.set_ylabel(r'GEM flux [ng m$\mathregular{^-}$$\mathregular{^2}$ h$\mathregular{^-}$$\mathregular{^1}$]')
