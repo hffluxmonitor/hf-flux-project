@@ -11,8 +11,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
+import matplotlib
 
 import os
+
+def set_style():
+    plt.style.use(['grayscale'])
+    matplotlib.rc("font", family="Times New Roman", size = 12)
+    
+def set_size(fig):
+    fig.set_size_inches(10, 5)
+    plt.tight_layout()
+    plt.margins(0.005)
+    
 username = os.getlogin()
 df = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/flux_data.csv')
 df.set_index('datetime',inplace=True)
@@ -46,7 +57,8 @@ df8 = df[df['month']==8]
 #    ax[b].plot(df+str(i).index.values,flower,color = 'darkorange')
     
 
-fig, ax = plt.subplots(2,3,sharey=True,figsize = (10,5))
+fig, ax = plt.subplots(2,3,sharey=True,figsize = (12,8))
+set_style()
 fig.subplots_adjust(wspace=0, hspace=0.2)
 fig.autofmt_xdate()
 fig.suptitle('GEM Flux',weight = 'bold')
@@ -82,6 +94,10 @@ ax[1,1].plot(df8.index.values,fupper,color = 'darkblue')
 ax[1,1].plot(df8.index.values,flower,color = 'red')
 ax[1,1].axhline(y=0,linestyle='dotted', color = 'black')
 ax[1,1].set_title('August')
+
+fig.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/GEM_flux.jpg')
+
+
 
 
 
