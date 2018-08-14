@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jun 27 13:14:13 2018
-
 @author: Timothy_Richards
-
 Description:
 """
 #%%
 import pandas as pd
-import fluxPlotBeforeandAfterLeafOut
+#import fluxPlotBeforeandAfterLeafOut
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
@@ -35,12 +33,14 @@ df['week'] = df.index.week
 df['flux_ma'] = df['flux'].rolling(window = 10).mean()
 df['gradient_ma'] = df['gradient'].rolling(window = 5).mean()
 df['gradient_std'] = df['gradient']-df['gradient'].mean()
+df['gradient_adj'] = df['gradient'] - .004
 
 #Create datafrom with hourly means for diurnal gradient plot
 df['hour'] = df.index.hour
 df_hour = df.pivot_table(columns = 'hour',
                          values = ['lower_0','upper_1','gradient','Wspd.m/s',
-                                   'Wdir.deg','T','Fheat','gradient_std'],
+                                   'Wdir.deg','T','Fheat','gradient_std',
+                                   'gradient_adj'],
                                    aggfunc = 'mean').T
 
 #Flux vs. time
@@ -59,15 +59,16 @@ ax.axhline(0,linestyle='dotted')
 fig.autofmt_xdate()
 fig.tight_layout()
 
-df4h = df4.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
-df5h = df5.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
-df6h = df6.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
-df7h = df7.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
-df8h = df8.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
+dfh = df.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
+df4h = df4.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
+df5h = df5.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
+df6h = df6.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
+df7h = df7.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
+df8h = df8.pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
 df8h = df8h.fillna(method = 'ffill') #Temporary; as of 8/10, no 9 am values for flux
 #%%
-fluxPlotBeforeandAfterLeafOut.gradient_leafout(df)
-fluxPlotBeforeandAfterLeafOut.diurnal_leafout(df)
+#fluxPlotBeforeandAfterLeafOut.gradient_leafout(df)
+#fluxPlotBeforeandAfterLeafOut.diurnal_leafout(df)
 #%%
 def B_gradient_plots():
     
@@ -239,6 +240,69 @@ figP.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/
 
 #%%
 #Plot corrected (adjusted) flux/gradient (subtract .004 from all gradients)
+set_style()
+fig3, ax3 = plt.subplots()
+##Plot smooth lines
+#Plot April
+x = df4h.index.values
+y = df4h.gradient_adj
+x_sm = np.array(df4h.index.values)
+x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+y_smooth = spline(x, y, x_smooth)
+ax3.plot(x_smooth,y_smooth, color = 'green',label = 'April',linestyle = 'dashed')
+
+#Plot May
+x = df5h.index.values
+y = df5h.gradient_adj
+x_sm = np.array(df5h.index.values)
+x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+y_smooth = spline(x, y, x_smooth)
+ax3.plot(x_smooth,y_smooth, color = 'gold',label = 'May',linestyle = 'dashed')
+
+#June
+x = df6h.index.values
+y = df6h.gradient_adj
+x_sm = np.array(df6h.index.values)
+x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+y_smooth = spline(x, y, x_smooth)
+ax3.plot(x_smooth,y_smooth, color = 'maroon',label = 'June',linestyle = 'dashed')
+
+#July
+x = df7h.index.values
+y = df7h.gradient_adj
+x_sm = np.array(df7h.index.values)
+x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+y_smooth = spline(x, y, x_smooth)
+ax3.plot(x_smooth,y_smooth, color = 'red',label = 'July', linestyle = 'dashed')
+
+#August
+x = df8h.index.values
+y = df8h.gradient_adj
+x_sm = np.array(df8h.index.values)
+x_smooth = np.linspace(x_sm.min(), x_sm.max(), 200)
+y_smooth = spline(x, y, x_smooth)
+ax3.plot(x_smooth,y_smooth, color = 'darkblue',label = 'August', linestyle = 'dashed')
+
+#Set other plot stuff
+ax3.legend()
+ax3.axhline(0,linestyle='dotted')
+ax3.set_xlabel('Hour')
+ax3.set_xticks(df4h.index.values)
+ax3.set_ylabel(r'GEM adjusted gradient [ng m$\mathregular{^-}$$\mathregular{^4}$]')
+ax3.xaxis.set_major_locator(plt.MultipleLocator(2))
+set_size(fig3)
+fig3.tight_layout()
+
+#%%
+#Plot flux, gradient, adjusted diurnal over entire time period
+
+fig4, ax4 = plt.subplots()
+ax4.plot(dfh['flux_ma'])
+
+fig5, ax5 = plt.subplots()
+ax5.plot(dfh['gradient_ma'])
+ax5.plot(dfh['gradient_adj'],linestyle='dashed')
+
 
 #%%
 #Windrose plots

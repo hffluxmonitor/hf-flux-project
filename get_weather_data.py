@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug 14 07:10:48 2018
-
 @author: FluxMonitor
-
 Description: Uses Dark Sky API to request historical weather data
 """
 import pandas as pd
 import numpy as np
 from rapidconnect import RapidConnect
 import datetime as dt
+import os
+
+username = os.getlogin()
 rapid = RapidConnect("default-application_5b72b75fe4b02799e7f62892", "4df23935-0f28-4bd5-9eb1-0e8d7b021f78")
 
 today = pd.to_datetime(dt.datetime.now().strftime('%y-%m-%d 00:00:00'),yearfirst = True)
@@ -54,18 +55,11 @@ for d in date_range:
         daily_precip.loc[d,'precip_avg_rate_mm_hour'] = precip.loc[d,'precip_rate_mm_hour']
         daily_precip.loc[d,'precip_type'] = precip.loc[d,'precip_type']
         
-daily_precip.to_csv('C://Users/FluxMonitor/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv')
+daily_precip.to_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv')
         
     
     
      
 
 #Create dataframe of entire dataset hourly
-
-    
-    
-    
-
-    
-
 
