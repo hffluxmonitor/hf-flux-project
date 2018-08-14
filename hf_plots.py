@@ -217,18 +217,25 @@ df_week = df.pivot_table(columns = 'week', values = ['flux_ma','gradient_ma'],ag
 
 #%%
 #Scatter plots of flux vs. envi variables (rain, soil temp, temp, wind)
-pApr = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/April2018.csv')
-pMay = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/May2018.csv')
-pJun = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/June2018.csv')
-pJul = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/July2018.csv')
-pAug = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/Aug2018.csv')
+#Daily flux vs. avg precip rate (mm/hour)
+#Add labels and all that fun stuff
+p_rates = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv',
+                           names = ['date','precip_rate_mm_hour','type_precip'],header = 0)
+p_rates['date'] = pd.to_datetime(p_rates.date)
+p_rates = p_rates.set_index(p_rates.date)
 
-figP, axP = plt.subplots(2,3,figsize = (12,8),sharey=True)
-axP[0,0].plot(pApr['Precip_in'])
-axP[0,1].plot(pMay['Precip_in'])
-axP[0,2].plot(pJun['Precip_in'])
-axP[1,0].plot(pJul['Precip_in'])
-axP[1,1].plot(pAug['Precip_in'])
+d_flux = df.resample('1D').mean()
+d_flux = d_flux.set_index(pd.DatetimeIndex(d_flux.index))
+pavg_rates = pd.merge(p_rates,d_flux, how='inner', left_index=True, right_index=True)
+
+figP, axP = plt.subplots(figsize = (12,8),sharex=True)
+axP.plot(pavg_rates['precip_rate_mm_hour'])
+axP.xaxis.set_major_locator(plt.MultipleLocator(15))
+axF = axP.twinx()
+axF.plot(pavg_rates['flux'], color = 'red', linestyle = 'dotted')
+figP.autofmt_xdate()
+figP.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/DailyFlux_PrecipRates.jpg')
+
 
 #%%
 #Plot corrected (adjusted) flux/gradient (subtract .004 from all gradients)
