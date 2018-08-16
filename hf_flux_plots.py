@@ -12,12 +12,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import statsmodels.api as sm
 import matplotlib
+import matplotlib.dates as mdates
 
 import os
 
 def set_style():
-    plt.style.use(['grayscale'])
-    matplotlib.rc("font", family="Times New Roman", size = 12)
+    plt.style.use(['ggplot'])
+    matplotlib.rc("font", family="Times New Roman", size = 10)
     
 def set_size(fig):
     fig.set_size_inches(10, 5)
@@ -43,25 +44,11 @@ df8 = df[df['month']==8]
 #sns.heatmap(corr, 
 #            xticklabels=corr.columns.values,
 #            yticklabels=corr.columns.values)
-
-#fig, ax = plt.subplots(1,4,sharey=True,figsize = (15,5))
-#fig.subplots_adjust(wspace=0, hspace=0)
-#fig.autofmt_xdate()
-#df = str("df")
-#for i in range(4,8):
-#    i = str(i)
-#    fupper = np.ma.masked_where(int(df+i)['flux_ma'] > 0, (df+i)['flux_ma'])
-#    flower = np.ma.masked_where(df+i)['flux_ma'] < 0, (df+i)['flux_ma'])
-#    b = 0
-#    ax[b].plot(df+str(i).index.values,fupper,color = 'green')
-#    ax[b].plot(df+str(i).index.values,flower,color = 'darkorange')
     
-
-fig, ax = plt.subplots(2,3,sharey=True,figsize = (12,8))
+myFmt = mdates.DateFormatter('%d')
+fig, ax = plt.subplots(2,3,sharey=True,figsize = (10,7))
 set_style()
-fig.subplots_adjust(wspace=0, hspace=0.2)
-fig.autofmt_xdate()
-fig.suptitle('GEM Flux',weight = 'bold')
+fig.subplots_adjust(wspace=0.1, hspace=0.2)
 fig.text(0.07,0.55,'GEM Flux [ng m-2 h-1]',rotation = 'vertical',
          ha = 'center',va = 'center')
 fupper = np.ma.masked_where(df4['flux_ma'] > 0, df4['flux_ma'])
@@ -94,8 +81,15 @@ ax[1,1].plot(df8.index.values,fupper,color = 'darkblue')
 ax[1,1].plot(df8.index.values,flower,color = 'red')
 ax[1,1].axhline(y=0,linestyle='dotted', color = 'black')
 ax[1,1].set_title('August')
+ax[1,1].fmt_xdata = mdates.DateFormatter('%m-%d')
 
-fig.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/GEM_flux.jpg')
+#Format x-labels of all subplots
+for i, ax in enumerate(fig.axes):
+    fig.axes[i].xaxis_date()
+    fig.axes[i].xaxis.set_major_formatter(myFmt)
+
+
+fig.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/GEM_flux.pdf')
 
 
 

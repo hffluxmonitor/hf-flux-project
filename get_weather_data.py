@@ -61,12 +61,14 @@ for d in date_range:
         daily_precip.loc[d,'sunrise'] = precip.loc[d,'sunrise']
         daily_precip.loc[d,'sunset'] = precip.loc[d,'sunset']
        
-daily_precip['sunrise'] = pd.to_datetime(daily_precip['sunrise'].astype(int),unit = 's')
-daily_precip['sunrise'] = daily_precip['sunrise'].dt.time - pd.Timedelta('04:00:00')
-daily_precip['sunset'] = pd.to_datetime(daily_precip['sunrise'].astype(int),unit = 's')
-daily_precip['sunset'] = daily_precip['sunset'].dt.time
+#daily_precip['sunrise'] = pd.to_datetime(daily_precip['sunrise'].astype(int),unit = 's')
+#daily_precip['sunrise'] = daily_precip['sunrise'].dt.time - pd.Timedelta('04:00:00')
+#daily_precip['sunset'] = pd.to_datetime(daily_precip['sunrise'].astype(int),unit = 's')
+#daily_precip['sunset'] = daily_precip['sunset'].dt.time
         
 daily_precip.to_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv')
+
+#Join weather data with flux data
         
 
 #Create dataframe of entire dataset hourly

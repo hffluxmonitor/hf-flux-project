@@ -21,10 +21,10 @@ def merge_gemB_sonic_data():
     df_gem = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/TimeSeries/TK2537B.csv')
     df_gem['datetime'] = pd.to_datetime(df_gem['datetime'],yearfirst=True)
     df_gem.set_index('datetime',inplace=True)
+    df_gem = df_gem[(df_gem['flag'] == 0) | (df_gem['flag'] == 1)] #Only keep flux (intake 0,1) data
     
     #Create pivot table with one column for each intake
     df_gem_piv = df_gem.pivot(columns = 'flag',values = 'conc')
-    df_gem_piv = df_gem_piv.drop(np.nan,axis=1)
     df_gem_piv.columns = ['lower_0','upper_1']
     df_gem_piv = df_gem_piv.astype(float)
     

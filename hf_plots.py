@@ -12,6 +12,9 @@ import numpy as np
 import matplotlib
 from scipy.interpolate import spline
 from matplotlib.ticker import MultipleLocator
+from numpy.polynomial.polynomial import polyfit
+import statsmodels.api as sm
+import seaborn
 #%%
 #['seaborn-ticks',
 # 'seaborn-talk',
@@ -85,10 +88,16 @@ df7h = d['df_7'].pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma'
 df8h = d['df_8'].pivot_table(columns = 'hour', values = ['flux_ma','gradient_ma','gradient_adj'],aggfunc=np.mean).T
 df8h = df8h.fillna(method = 'ffill') #Temporary; as of 8/10, no 9 am values for flux
 
+#Get daily precip rates
 p_rates = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv',
-                      names = ['date','precip_rate_mm_hour','type_precip','sunrise','sunset'],header = 0)
+                      names = ['date','rate_mm_hour','type','sunrise','sunset'],header = 0)
 p_rates['date'] = pd.to_datetime(p_rates.date)
 p_rates = p_rates.set_index(p_rates.date)
+
+#create daily flux df and merge it with p_rates
+d_flux = df.resample('1D').mean()
+d_flux = d_flux.set_index(pd.DatetimeIndex(d_flux.index))
+pavg_rates = pd.merge(p_rates,d_flux, how='inner', left_index=True, right_index=True)
 
 def GEM_flux():
     #Flux vs. time
@@ -265,9 +274,6 @@ df_week = df.pivot_table(columns = 'week', values = ['flux_ma','gradient_ma'],ag
 #Add labels and all that fun stuff
 def flux_precip():
     set_style()    
-    d_flux = df.resample('1D').mean()
-    d_flux = d_flux.set_index(pd.DatetimeIndex(d_flux.index))
-    pavg_rates = pd.merge(p_rates,d_flux, how='inner', left_index=True, right_index=True)
     
     figP, axF = plt.subplots(figsize = (12,8),sharex=True)
     axF.plot(pavg_rates.index.values,pavg_rates['flux'], color = 'black', linestyle = 'solid', linewidth = 1.5, marker = 'o', markersize = 4)
@@ -275,7 +281,7 @@ def flux_precip():
     axF.axhline(0,color = 'black', linestyle = 'dashed', alpha = 0.7)
     axF.xaxis.set_major_locator(plt.MultipleLocator(15))
     axP = axF.twinx()
-    axP.plot(pavg_rates['precip_rate_mm_hour'], linestyle = 'dashed',linewidth = 1.5, color = 'blue', alpha = 0.6)
+    axP.plot(pavg_rates['rate_mm_hour'], linestyle = 'dashed',linewidth = 1.5, color = 'blue', alpha = 0.6)
     axP.set_ylabel(r'Liquid precipitation rate [mm h$\mathregular{^-}$$\mathregular{^1}$]', color = 'blue')
     axP.set_title('GEM flux vs mean precipitation rate')
     axP.axvspan('2018-06-23 00:00:00','2018-08-14 00:00:00', color = 'yellow', alpha = 0.1)
@@ -377,11 +383,30 @@ def windrose():
 def scatter_windspd():
     set_style()
     figS, axS = plt.subplots()
-    axS.scatter(df['Wspd.m/s'],df.GEM_avg_conc)
+    x = df['Wspd.m/s']
+    y = df.GEM_avg_conc
+    axS.scatter(x,y)
     axS.set_xlabel(r'Wind speed - m s$\mathregular{^-}$$\mathregular{^1}$')
-    axS.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')
+    axS.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')    
     figS.tight_layout()
-
+    
+    seaborn.regplot(x,y,ci=68)
+    
+    figS.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
+    
+def scatter_preciprate():
+    set_style()
+    figSP, axSP = plt.subplots()
+    x = pavg_rates['rate_mm_hour']
+    y = pavg_rates.GEM_avg_conc
+    axSP.scatter(x,y)
+    axSP.set_xlabel(r'Liquid precipitation rate - mm h$\mathregular{^-}$$\mathregular{^1}$')
+    axSP.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')    
+    figSP.tight_layout()
+    
+    figSP.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
+    
+    seaborn.regplot(x,y,dropna=True)
  
 #%%
 #Plot plots
@@ -392,5 +417,6 @@ diurnal_gradient_plot()
 flux_precip()
 windrose()
 scatter_windspd()
+scatter_preciprate()
 
 
