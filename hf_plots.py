@@ -14,7 +14,7 @@ from scipy.interpolate import spline
 from matplotlib.ticker import MultipleLocator
 from numpy.polynomial.polynomial import polyfit
 import statsmodels.api as sm
-import seaborn
+import seaborn as sns
 #%%
 #['seaborn-ticks',
 # 'seaborn-talk',
@@ -69,7 +69,7 @@ df['hour'] = df.index.hour
 df_hour = df.pivot_table(columns = 'hour',
                          values = ['lower_0','upper_1','gradient','Wspd.m/s',
                                    'Wdir.deg','T','Fheat','gradient_std',
-                                   'gradient_adj'],
+                                   'gradient_adj','flux'],
                                    aggfunc = 'mean').T
 
 #Create dataframes for each month
@@ -390,7 +390,7 @@ def scatter_windspd():
     axS.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')    
     figS.tight_layout()
     
-    seaborn.regplot(x,y,ci=68)
+    sns.regplot(x,y,ci=68)
     
     figS.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
     
@@ -406,8 +406,21 @@ def scatter_preciprate():
     
     figSP.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
     
-    seaborn.regplot(x,y,dropna=True)
+    sns.regplot(x,y,dropna=True)
  
+#%%
+#Boxplots
+def flux_boxplot():
+    set_style()
+    figB, axB = plt.subplots()
+    
+    axB = sns.boxplot(x="hour", y="flux",
+                data=df)
+    axB.plot(df_hour.index.values,df_hour.flux,color = 'white',linestyle = 'dashed',
+             linewidth = 3,marker = 'o')
+    figB.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/box_flux_hourly.pdf')
+
+
 #%%
 #Plot plots
 GEM_flux()
@@ -418,5 +431,6 @@ flux_precip()
 windrose()
 scatter_windspd()
 scatter_preciprate()
+flux_boxplot()
 
 

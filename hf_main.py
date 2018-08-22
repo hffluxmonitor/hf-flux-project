@@ -19,6 +19,8 @@ hf_flux_calc()
 #Flux plots
 hf_flux_plots()
 #Other plots
+#Get weather data
+###get_weather_data call
 #Call all plots seperately from hf_plots
 hf_plots.scatter_windspd()
 #

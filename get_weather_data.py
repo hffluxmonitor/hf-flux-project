@@ -69,7 +69,15 @@ for d in date_range:
 daily_precip.to_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/PrecipData/DailyPrecip/MeanDailyPrecipRates.csv')
 
 #Join weather data with flux data
-        
+df = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/flux_data.csv')
+df.set_index('datetime',inplace=True)
+df.index = pd.to_datetime(df.index) 
+df = df.resample('1D').mean()
+m = pd.merge(df,daily_precip, how='inner', left_index=True, right_index=True) 
+
+#save off daily flux data w/ weather data    
 
 #Create dataframe of entire dataset hourly
+
 #Check if time is in correct timezone (check result[currenttime] and make sure it's correct)
+##Dates are correct, need to subtract 4 hours from sunrise/sunset times (UTC)
