@@ -110,23 +110,7 @@ if __name__ == "__main__":
     # Tweak spacing to prevent clipping of ylabel
     fig.tight_layout()
     plt.show()
-    #%%
-    #Scatter Plots
-    figScat, ax = plt.subplots(4,sharex=True,figsize = (9,9))
-    
-    ax[3].scatter(df_flux.index.values,df_flux['flux'],color='r',s=3)
-    ax[3].set_ylabel('GEM Flux (ng m$\mathregular{^-}$$\mathregular{^2}$ h$\mathregular{^-}$$\mathregular{^1}$)',
-                      color = 'r')
-    ax[0].set_xlim(df_flux.index.values.min(),df_flux.index.values.max())
-    ax[0].scatter(df_flux.index.values,df_flux['H'],color='orange',s=1)
-    ax[0].yaxis.set_label_position("right")
-    ax[1].set_ylabel('Air Temperature (K)',color = 'purple')
-    ax[1].scatter(df_flux.index.values,df_flux['T_K'],color='purple',s=1)
-    ax[2].set_ylabel('GEM Concentration (ng m$\mathregular{^-}$$\mathregular{^3}$)',color = 'darkgreen')
-    ax[2].scatter(df_flux.index.values,df_flux['GEM_avg_conc'],color='darkgreen',s=1)
-    ax[0].set_ylabel('Heat Flux (W m$\mathregular{^-}$$\mathregular{^2}$)',color = 'orange')
-    ax[2].yaxis.set_label_position("right")
-    figScat.autofmt_xdate()
+
     #%%
     bLeaf = df_flux.ix['2018-04-17':'2018-05-01'] #prior to leaf out
     aLeaf = df_flux.ix['2018-06-13':'2018-06-27'] #two most recent weeks

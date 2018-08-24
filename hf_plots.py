@@ -15,6 +15,7 @@ from matplotlib.ticker import MultipleLocator
 from numpy.polynomial.polynomial import polyfit
 import statsmodels.api as sm
 import seaborn as sns
+from scipy import stats
 #%%
 #['seaborn-ticks',
 # 'seaborn-talk',
@@ -57,6 +58,7 @@ username = os.getlogin()
 df = pd.read_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/flux_data.csv')
 df.set_index('datetime',inplace=True)
 df.index = pd.to_datetime(df.index)
+df = df.drop('Unnamed: 0',axis = 1)
 df['month'] = df.index.month
 df['week'] = df.index.week
 df['flux_ma'] = df['flux'].rolling(window = 10).mean()
@@ -383,30 +385,60 @@ def windrose():
 def scatter_windspd():
     set_style()
     figS, axS = plt.subplots()
-    x = df['Wspd.m/s']
-    y = df.GEM_avg_conc
-    axS.scatter(x,y)
+    x = df['Wspd.m/s'].ffill()
+    y = df.GEM_avg_conc.ffill()
     axS.set_xlabel(r'Wind speed - m s$\mathregular{^-}$$\mathregular{^1}$')
     axS.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')    
     figS.tight_layout()
     
-    sns.regplot(x,y,ci=68)
+    p = sns.regplot(x,y,ci=68)
+    
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+    r_squared = r_value**2
+    
+    p.axes.text(0.7,0.9,'r-squared = '+ str(round(r_squared,4)),transform = p.axes.transAxes,
+                fontsize = 14)
     
     figS.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
     
 def scatter_preciprate():
     set_style()
     figSP, axSP = plt.subplots()
-    x = pavg_rates['rate_mm_hour']
-    y = pavg_rates.GEM_avg_conc
-    axSP.scatter(x,y)
+    x = pavg_rates['rate_mm_hour'].ffill()
+    y = pavg_rates.GEM_avg_conc.ffill()
     axSP.set_xlabel(r'Liquid precipitation rate - mm h$\mathregular{^-}$$\mathregular{^1}$')
     axSP.set_ylabel(r'GEM concentration - ng m$\mathregular{^-}$$\mathregular{^3}$')    
     figSP.tight_layout()
+    p = sns.regplot(x,y,dropna=True)
+    
+    slope, intercept, r_value, p_value, std_err = stats.linregress(x, y)
+    r_squared = r_value**2
+    
+    p.axes.text(0.7,0.9,'r-squared = '+ str(round(r_squared,4)),transform = p.axes.transAxes,
+                fontsize = 14)
     
     figSP.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_windspd.pdf')
     
-    sns.regplot(x,y,dropna=True)
+def scatter_flux_micro():
+    #Scatter Plots
+    set_style()
+    figScat, ax = plt.subplots(4,sharex=True,figsize = (9,9))
+    
+    ax[3].scatter(df.index.values,df['flux'],color='r',s=3)
+    ax[3].set_ylabel('GEM Flux (ng m$\mathregular{^-}$$\mathregular{^2}$ h$\mathregular{^-}$$\mathregular{^1}$)',
+                      color = 'r')
+    ax[0].set_xlim(df.index.values.min(),df.index.values.max())
+    ax[0].scatter(df.index.values,df['H'],color='orange',s=1)
+    ax[0].yaxis.set_label_position("right")
+    ax[1].set_ylabel('Air Temperature (K)',color = 'purple')
+    ax[1].scatter(df.index.values,df['T_K'],color='purple',s=1)
+    ax[2].set_ylabel('GEM Concentration (ng m$\mathregular{^-}$$\mathregular{^3}$)',color = 'darkgreen')
+    ax[2].scatter(df.index.values,df['GEM_avg_conc'],color='darkgreen',s=1)
+    ax[0].set_ylabel('Heat Flux (W m$\mathregular{^-}$$\mathregular{^2}$)',color = 'orange')
+    ax[2].yaxis.set_label_position("right")
+    figScat.autofmt_xdate()
+    
+    figScat.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/scatter_flux_micro.pdf')
  
 #%%
 #Boxplots
@@ -432,5 +464,8 @@ windrose()
 scatter_windspd()
 scatter_preciprate()
 flux_boxplot()
+scatter_flux_micro()
+
+
 
 
