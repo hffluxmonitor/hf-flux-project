@@ -11,6 +11,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import FluxSpikeRemoval
+import add_qc_flag
+
 
 username = os.getlogin()
 
@@ -87,6 +89,7 @@ if __name__ == "__main__":
     df.index = pd.to_datetime(df['datetime'])
     df = df.drop('datetime',axis=1)
     df_flux = flux_calc(df)
+    df_flux = add_qc_flag.add_qc_flag(df_flux) #Adds QC flag onto dataframe for all date ranges in qc_log_b
     df_flux.to_csv('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/flux_data.csv')
     #%%
     plt.plot(df_flux['flux'])
