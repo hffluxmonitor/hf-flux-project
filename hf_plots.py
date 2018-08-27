@@ -40,9 +40,8 @@ from scipy import stats
 # 'dark_background']
 
 def set_style():
-    plt.style.use(['default'])
-    plt.style.use(['bmh'])
-    matplotlib.rc("font", family="Times New Roman", size = 8)
+    plt.style.use(['classic'])
+    matplotlib.rc("font", family="Times New Roman", size = 10)
     
 def set_size(fig):
     fig.set_size_inches(8, 5)
@@ -265,10 +264,30 @@ def diurnal_gradient_plot():
     fig3.savefig('C://Users/'+username+'/Dropbox/Obrist Lab/HarvardForestData/Plots/GEM_hourly_gradient.pdf')
 #%%
 #Weekly means for flux/gradient
-df_week = df.pivot_table(columns = 'week', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
+def weekly_fluxgradient():
+    df_week = df.pivot_table(columns = 'week', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
+    
+    set_style()
+    figW, axW = plt.subplots()
+    axW.plot(df_week.index.values, df_week.flux_ma,label = 'Flux')
+    axW.xaxis.set_major_locator(plt.MultipleLocator(2))
+    axY = axW.twinx()
+    axY.plot(df_week.index.values, df_week.gradient_ma, color = 'orange',label = 'Gradient')
+    axW.set_xlabel('Week of year')
+    axW.set_ylabel('Flux')
+    axY.set_ylabel('Gradient')
+    figW.tight_layout()
+    figW.legend()
 
 #%%
 #Day vs. night gradient/flux
+#Convert time (UTC) to EDT (UTC-4)
+avg_sunrise = np.nanmean(pavg_rates.sunrise)
+avg_sunrise = pd.to_datetime(avg_sunrise, unit = 's') - pd.Timedelta('04:00:00')
+avg_sunset = np.nanmean(pavg_rates.sunset)
+avg_sunset = pd.to_datetime(avg_sunset, unit = 's') - pd.Timedelta('04:00:00')
+
+
 
 #%%
 #Scatter plots of flux vs. envi variables (rain, soil temp, temp, wind)
@@ -465,6 +484,24 @@ scatter_windspd()
 scatter_preciprate()
 flux_boxplot()
 scatter_flux_micro()
+weekly_fluxgradient()
+
+mu = df['flux'].mean()
+sigma2 = df['flux'].std()
+num_bins = 50
+
+fig, ax = plt.subplots()
+# the histogram of the data
+n, bins, patches = ax.hist(df['flux'], num_bins, density=1, range=(np.nanmin(df['flux']),np.nanmax(df['flux'])))
+# add a 'best fit' line
+y = ((1 / (np.sqrt(2 * np.pi) * sigma2)) *
+     np.exp(-0.5 * (1 / sigma2 * (bins - mu))**2))
+ax.plot(bins, y, '--')
+ax.set_xlabel('GEM Flux [ng m-2 h-1]')
+ax.set_ylabel('Probability density')
+# Tweak spacing to prevent clipping of ylabel
+fig.tight_layout()
+plt.show()
 
 
 

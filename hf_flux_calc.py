@@ -112,39 +112,39 @@ if __name__ == "__main__":
     plt.show()
 
     #%%
-    bLeaf = df_flux.ix['2018-04-17':'2018-05-01'] #prior to leaf out
-    aLeaf = df_flux.ix['2018-06-13':'2018-06-27'] #two most recent weeks
+#    bLeaf = df_flux.ix['2018-04-17':'2018-05-01'] #prior to leaf out
+#    aLeaf = df_flux.ix['2018-06-13':'2018-06-27'] #two most recent weeks
+#        
+#    bLeaf['hour'] = bLeaf.index.hour
+#    bLeaf_hour = bLeaf.pivot_table(columns = 'hour',
+#                         values = ['lower_0','upper_1','gradient','Wspd.m/s',
+#                                   'Wdir.deg','T','Fheat','u*','T_K',
+#                                   'H','L','(z-d)/L','StabilityClass','psi1',
+#                                   'psi2','GEM_avg_conc','flux'],
+#                                   aggfunc = 'mean').T
+#                                    
+#    aLeaf['hour'] = aLeaf.index.hour
+#    aLeaf_hour = aLeaf.pivot_table(columns = 'hour',
+#                         values = ['lower_0','upper_1','gradient','Wspd.m/s',
+#                                   'Wdir.deg','T','Fheat','u*','T_K',
+#                                   'H','L','(z-d)/L','StabilityClass','psi1',
+#                                   'psi2','GEM_avg_conc','flux'],
+#                                   aggfunc = 'mean').T
         
-    bLeaf['hour'] = bLeaf.index.hour
-    bLeaf_hour = bLeaf.pivot_table(columns = 'hour',
-                         values = ['lower_0','upper_1','gradient','Wspd.m/s',
-                                   'Wdir.deg','T','Fheat','u*','T_K',
-                                   'H','L','(z-d)/L','StabilityClass','psi1',
-                                   'psi2','GEM_avg_conc','flux'],
-                                   aggfunc = 'mean').T
-                                    
-    aLeaf['hour'] = aLeaf.index.hour
-    aLeaf_hour = aLeaf.pivot_table(columns = 'hour',
-                         values = ['lower_0','upper_1','gradient','Wspd.m/s',
-                                   'Wdir.deg','T','Fheat','u*','T_K',
-                                   'H','L','(z-d)/L','StabilityClass','psi1',
-                                   'psi2','GEM_avg_conc','flux'],
-                                   aggfunc = 'mean').T
-        
-    fig2,ax2 = plt.subplots(2,1,sharex=True)
-    ax2[0].set_title("Diurnal above canopy GEM flux before and after leaf-out")
-    ax2[0].plot(bLeaf_hour['flux'],linewidth=2,label = "Before Leaf-out")
-    ax2[0].axvspan(0,5,alpha=0.2,color='gray')
-    ax2[0].axvspan(18,24,alpha=0.2,color='gray')
-    ax2[0].set_ylabel('$GEM_{gradient}$\n'+'[ng m$\mathregular{^-}$$\mathregular{^4}$]')
-    ax2[1].set_ylabel('$GEM_{gradient}$\n'+'[ng m$\mathregular{^-}$$\mathregular{^4}$]')
-    ax2[1].margins(0)
-        
-    ax2[1].plot(aLeaf_hour['flux'],color = 'r',linewidth = 2,
-       label = "After Leaf-out")
-    ax2[1].axvspan(0,5,alpha=0.2,color='gray')
-    ax2[1].axvspan(18,24,alpha=0.2,color='gray')
-    ax2[0].legend()
-    ax2[1].legend()
-    ax2[1].set_xlabel('$time\/[hour]$')
-    fig2.tight_layout()
+#    fig2,ax2 = plt.subplots(2,1,sharex=True)
+#    ax2[0].set_title("Diurnal above canopy GEM flux before and after leaf-out")
+#    ax2[0].plot(bLeaf_hour['flux'],linewidth=2,label = "Before Leaf-out")
+#    ax2[0].axvspan(0,5,alpha=0.2,color='gray')
+#    ax2[0].axvspan(18,24,alpha=0.2,color='gray')
+#    ax2[0].set_ylabel('$GEM_{gradient}$\n'+'[ng m$\mathregular{^-}$$\mathregular{^4}$]')
+#    ax2[1].set_ylabel('$GEM_{gradient}$\n'+'[ng m$\mathregular{^-}$$\mathregular{^4}$]')
+#    ax2[1].margins(0)
+#        
+#    ax2[1].plot(aLeaf_hour['flux'],color = 'r',linewidth = 2,
+#       label = "After Leaf-out")
+#    ax2[1].axvspan(0,5,alpha=0.2,color='gray')
+#    ax2[1].axvspan(18,24,alpha=0.2,color='gray')
+#    ax2[0].legend()
+#    ax2[1].legend()
+#    ax2[1].set_xlabel('$time\/[hour]$')
+#    fig2.tight_layout()
