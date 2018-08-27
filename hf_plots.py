@@ -266,10 +266,13 @@ def diurnal_gradient_plot():
 #Weekly means for flux/gradient
 def weekly_fluxgradient():
     df_week = df.pivot_table(columns = 'week', values = ['flux_ma','gradient_ma'],aggfunc=np.mean).T
+    df_week['flux_std'] = df_week['flux_ma'].rolling(window = 5, min_periods=1).std()
     
     set_style()
     figW, axW = plt.subplots()
     axW.plot(df_week.index.values, df_week.flux_ma,label = 'Flux')
+    axW.fill_between(df_week.index.values,df_week.flux_ma+df_week.flux_std,
+                     df_week.flux_ma-df_week.flux_std,alpha = 0.3)
     axW.xaxis.set_major_locator(plt.MultipleLocator(2))
     axY = axW.twinx()
     axY.plot(df_week.index.values, df_week.gradient_ma, color = 'orange',label = 'Gradient')
